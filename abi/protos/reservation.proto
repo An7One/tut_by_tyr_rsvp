@@ -3,7 +3,7 @@ package reservation;
 
 import "google/protobuf/timestamp.proto";
 
-// reverseation status for a given tiem period
+// reverseation status for a given time period
 enum ReservationStatus{
     RESERVATION_STATUS_UNKNOWN = 0;
     RESERVATION_STATUS_PENDING = 1;
@@ -67,7 +67,7 @@ message UpdateResponse{
 }
 
 // to change a reservation from pending to confirmed,
-// to sned a ConfirmRequest
+// to send a ConfirmRequest
 message ConfirmRequest{
     Reservation reservation = 1;
 }
@@ -121,7 +121,7 @@ message ListenRequest{}
 
 // Server will send ListenResponse to the client in streaming response.
 message ListenResponse{
-    // upadte type
+    // update type
     ReservationUpdateType op = 1;
     // id for the updated reservation
     Reservation reservation = 2;

@@ -55,7 +55,7 @@ pub struct UpdateResponse {
     pub reservation: ::core::option::Option<Reservation>,
 }
 /// to change a reservation from pending to confirmed,
-/// to sned a ConfirmRequest
+/// to send a ConfirmRequest
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ConfirmRequest {
     #[prost(message, optional, tag = "1")]
@@ -121,14 +121,14 @@ pub struct ListenRequest {}
 /// Server will send ListenResponse to the client in streaming response.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ListenResponse {
-    /// upadte type
+    /// update type
     #[prost(enumeration = "ReservationUpdateType", tag = "1")]
     pub op: i32,
     /// id for the updated reservation
     #[prost(message, optional, tag = "2")]
     pub reservation: ::core::option::Option<Reservation>,
 }
-/// reverseation status for a given tiem period
+/// reverseation status for a given time period
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ReservationStatus {
