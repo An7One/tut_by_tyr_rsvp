@@ -97,6 +97,25 @@ message GetResponse{
     Reservation reservation = 1;
 }
 
+// query reservation by user id, resource id, start time, end time, and status
+message ReservationQuery{
+    // resource id for the reservation query.
+    // if empty, query all resources.
+    string resource_id = 1;
+    // user id for the reservation query.
+    // if empty, query all users.
+    string user_id = 2;
+    // use status to filter result.
+    // if unknown, return all reservations.
+    ReservationStatus status = 3;
+    // start time for the reservation query,
+    // if 0, use Infinity as the start time.
+    google.protobuf.Timestamp start = 4;
+    // end time for the reservation query.
+    // if 0, use Infinity as the end time
+    google.protobuf.Timestamp end = 5;
+}
+
 // to query reservations, send a QueryRequest
 message QueryRequest{
     // resource id for the reservation query.
