@@ -160,7 +160,7 @@ pub struct ListenResponse {
 pub enum ReservationStatus {
     Unknown = 0,
     Pending = 1,
-    Onfirmed = 2,
+    Confirmed = 2,
     Blocked = 3,
 }
 impl ReservationStatus {
@@ -172,7 +172,7 @@ impl ReservationStatus {
         match self {
             ReservationStatus::Unknown => "RESERVATION_STATUS_UNKNOWN",
             ReservationStatus::Pending => "RESERVATION_STATUS_PENDING",
-            ReservationStatus::Onfirmed => "RESERVATION_STATUS_ONFIRMED",
+            ReservationStatus::Confirmed => "RESERVATION_STATUS_CONFIRMED",
             ReservationStatus::Blocked => "RESERVATION_STATUS_BLOCKED",
         }
     }
