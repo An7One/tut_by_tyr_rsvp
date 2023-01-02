@@ -57,6 +57,7 @@ impl ReservationManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use abi::ReservationConflictInfo;
     use chrono::FixedOffset;
     #[sqlx_database_tester::test(pool(variable = "migrated_pool", migrations = "../migrations"))]
     async fn reserve_should_work_for_valid_time_window() {
@@ -81,21 +82,27 @@ mod tests {
         let manager = ReservationManager::new(migrated_pool.clone());
         let rsvp1 = Reservation::new_pending(
             "leon",
-            "ocrean-view-room-777",
+            "ocean-view-room-777",
             "2022-12-25T15:00:00-0700".parse().unwrap(),
             "2022-12-28T12:00:00-0700".parse().unwrap(),
             "hello",
         );
         let rsvp2 = Reservation::new_pending(
             "alice",
-            "ocrean-view-room-777",
+            "ocean-view-room-777",
             "2022-12-26T15:00:00-0700".parse().unwrap(),
             "2022-12-30T12:00:00-0700".parse().unwrap(),
             "hello",
         );
         let _reservation1 = manager.reserve(rsvp1).await.unwrap();
         let err = manager.reserve(rsvp2).await.unwrap_err();
-        // assert_eq!(err, Error::Conflict);
         println!("{:?}", err);
+        if let Error::ConflictingReservation(ReservationConflictInfo::Parsed(info)) = err{
+            assert_eq!(info.new.rid, "ocean-view-room-777");
+            assert_eq!(info.old.start.to_rfc3339(), "2022-12-25T22:00:00+00:00");
+            assert_eq!(info.old.end.to_rfc3339(), "2022-12-28T19:00:00+00:00");
+        }else{
+            panic!("expect conflict reservation error");
+        }
     }
 }
