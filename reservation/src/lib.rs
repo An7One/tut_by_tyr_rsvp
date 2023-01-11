@@ -23,7 +23,7 @@ pub trait Rsvp {
     // to update note
     async fn update_note(&self, id: ReservationId, note: String) -> Result<Reservation, Error>;
     // to delete one reservation
-    async fn delete(&self, id: ReservationId) -> Result<(), Error>;
+    async fn delete(&self, id: ReservationId) -> Result<Reservation, Error>;
     /// to get the reservation by id
     async fn get(&self, id: ReservationId) -> Result<Reservation, Error>;
     /// query reservations
