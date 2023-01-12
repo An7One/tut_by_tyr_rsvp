@@ -1,5 +1,4 @@
-use crate::{error::Error, RsvpStatus};
-use std::ops::{Bound, Range};
+use std::ops::Bound;
 
 use chrono::{DateTime, FixedOffset, Utc};
 use sqlx::{
@@ -8,7 +7,7 @@ use sqlx::{
     FromRow, Row,
 };
 
-use crate::{convert_to_timestamp, convert_to_utc_time, Reservation, ReservationStatus};
+use crate::{convert_to_timestamp, get_timespan, Reservation, ReservationStatus, RsvpStatus};
 
 impl Reservation {
     pub fn new_pending(
@@ -28,22 +27,8 @@ impl Reservation {
             status: ReservationStatus::Pending as i32,
         }
     }
-    pub fn validate(&self) -> Result<(), Error> {
-        if self.user_id.is_empty() {
-            return Err(Error::InvalidUserId(self.user_id.to_owned()));
-        }
-        if self.resource_id.is_empty() {
-            return Err(Error::InvalidResourceId(self.resource_id.to_owned()));
-        }
-        if self.start.is_none() || self.end.is_none() {
-            return Err(Error::InvalidTime);
-        }
-        Ok(())
-    }
-    pub fn get_timespan(&self) -> Range<DateTime<Utc>> {
-        let start: DateTime<Utc> = convert_to_utc_time(self.start.clone().unwrap());
-        let end = convert_to_utc_time(self.end.clone().unwrap());
-        return Range { start, end };
+    pub fn get_timespan(&self) -> PgRange<DateTime<Utc>> {
+        return get_timespan(self.start.as_ref(), self.end.as_ref());
     }
 }
 
