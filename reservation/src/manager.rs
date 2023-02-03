@@ -105,8 +105,9 @@ impl ReservationManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use abi::Error::*;
+    use abi::{Error::*, ReservationQueryBuilder};
     use abi::{ReservationConflict, ReservationConflictInfo, ReservationWindow};
+    use prost_types::Timestamp;
     const DUMMY_USER_ID_LEON: &str = "dummy_user_id_leon";
     const DUMMY_USER_ID_ALICE: &str = "dummy_user_id_alice";
     const DUMMY_ROOM_NAME: &str = "ocean-view-room-777";
@@ -159,16 +160,40 @@ mod tests {
     #[sqlx_database_tester::test(pool(variable = "migrated_pool", migrations = "../migrations"))]
     async fn query_reservations_should_work() {
         let (rsvp, manager) = make_reservation_for_leon(migrated_pool.clone()).await;
-        let query = ReservationQuery::new(
-            DUMMY_USER_ID_LEON,
-            DUMMY_ROOM_NAME,
-            "2023-12-24T15:00:00-0700".parse().unwrap(),
-            "2023-12-30T12:00:00-0700".parse().unwrap(),
-            ReservationStatus::Pending,
-            1,
-            10,
-            false,
-        );
+        let query = ReservationQueryBuilder::default()
+            .user_id(DUMMY_USER_ID_LEON.to_owned())
+            .start("2023-12-24T15:00:00-0700".parse::<Timestamp>().unwrap())
+            .end("2023-12-30T12:00:00-0700".parse::<Timestamp>().unwrap())
+            .status(abi::ReservationStatus::Pending as i32)
+            .build()
+            .unwrap();
+        let rsvps = manager.query(query).await.unwrap();
+        assert_eq!(rsvps.len(), 1);
+        assert_eq!(rsvps[0], rsvp);
+
+        // if the window is not in range,
+        // the result should be empty.
+        let query = ReservationQueryBuilder::default()
+            .user_id(DUMMY_USER_ID_LEON.to_owned())
+            .start("2021-11-01T15:00:00-0700".parse::<Timestamp>().unwrap())
+            .end("2023-02-01T12:00:00-0700".parse::<Timestamp>().unwrap())
+            .status(abi::ReservationStatus::Pending as i32)
+            .build()
+            .unwrap();
+        let rsvps = manager.query(query).await.unwrap();
+        assert_eq!(rsvps.len(), 0);
+
+        // to change the status to confirmed, the result should not be empty.
+        let query = ReservationQueryBuilder::default()
+            .user_id(DUMMY_USER_ID_LEON.to_owned())
+            .start("2021-11-01T15:00:00-0700".parse::<Timestamp>().unwrap())
+            .end("2023-12-31T12:00:00-0700".parse::<Timestamp>().unwrap())
+            .status(abi::ReservationStatus::Confirmed as i32)
+            .build()
+            .unwrap();
+        let rsvps = manager.query(query.clone()).await.unwrap();
+        assert_eq!(rsvps.len(), 0);
+        let rsvp = manager.change_status(rsvp.id).await.unwrap();
         let rsvps = manager.query(query).await.unwrap();
         assert_eq!(rsvps.len(), 1);
         assert_eq!(rsvps[0], rsvp);

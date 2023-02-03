@@ -14,5 +14,6 @@ sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "chr
 tokio = { version = "1.23.0", features = ["full"] }
 
 [dev-dependencies]
+prost-types = "0.11.6"
 sqlx-database-tester = { version = "0.4.2", features = ["runtime-tokio"] }
 tokio = { version = "1.23.0", features = ["full"] }
